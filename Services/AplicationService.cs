@@ -1,6 +1,8 @@
 ﻿using DeveloperChallenges.DTO;
 using DeveloperChallenges.Models;
 using Microsoft.EntityFrameworkCore;
+
+using System.Net.Mail;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace DeveloperChallenges.Services
@@ -57,6 +59,7 @@ namespace DeveloperChallenges.Services
 
                 response.IsSuccess = true;
                 response.Message = "Replay has been added to challenge";
+                Mail.NotifyHrTeam("engops-power-user@pdinet.com", "Eng@112024");
             }
             catch (Exception ex)
             {
@@ -77,6 +80,7 @@ namespace DeveloperChallenges.Services
 
                 response.IsSuccess = true;
                 response.Message = "User added successfully!";
+                Mail.NotifyHrTeam("engops-power-user@pdinet.com", "Eng@112024");
             }
             catch (Exception ex)
             {
@@ -128,5 +132,62 @@ namespace DeveloperChallenges.Services
                 Name = category
             }).ToList();
         }
+        public List<ChallengeReplay> GetReplays(int id)
+        {
+            // Fetch replays based on the provided Challenge Id
+            var replays = _context.challengeReplays
+                .Where(c => c.ChallengeId == id)
+                .ToList();
+
+            return replays;
+        }
+
+        public ResponseType DeleteReplay(int id)
+        {
+            var replay = _context.challengeReplays.FirstOrDefault(r => r.Id == id);
+
+            if (replay != null)
+            {
+                _context.challengeReplays.Remove(replay);
+                _context.SaveChanges();
+
+                return new ResponseType
+                {
+                    IsSuccess = true,
+                    Message = "Replay deleted successfully."
+                };
+            }
+
+            return new ResponseType
+            {
+                IsSuccess = false,
+                Message = "Replay not found."
+            };
+        }
+
+
+        public ResponseType UpdateReplay(int id, ChallengeReplay replay)
+        {
+            var existingReplay = _context.challengeReplays.FirstOrDefault(r => r.Id == id);
+            if (existingReplay != null)
+            {
+                existingReplay.Content = replay.Content;
+                existingReplay.RepliedBy = replay.RepliedBy;
+                _context.SaveChanges();
+
+                return new ResponseType
+                {
+                    IsSuccess = true,
+                    Message = "Replay deleted successfully."
+                };
+            }
+            return new ResponseType
+            {
+                IsSuccess = false,
+                Message = "Replay not found."
+            };
+        }
+
+
     }
 }

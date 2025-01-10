@@ -7,6 +7,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
 using DeveloperChallenges.Services;
+using Amazon.SecretsManager;
+using Amazon.SecretsManager;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +30,9 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>()
 // Configure JWT Authentication
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 var key = Encoding.UTF8.GetBytes(jwtSettings["SecretKey"]);
+
+
+
 
 builder.Services.AddAuthentication(options =>
 {

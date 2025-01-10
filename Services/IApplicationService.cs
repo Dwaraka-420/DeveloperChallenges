@@ -20,5 +20,10 @@ namespace DeveloperChallenges.Services
 
         ResponseType AddReplayToChallenge(ChallengeReplay challengeReplay);
 
+        List<ChallengeReplay> GetReplays(int Id);
+
+        ResponseType DeleteReplay(int Id);
+
+        ResponseType UpdateReplay(int id, ChallengeReplay replay);
     }
 }

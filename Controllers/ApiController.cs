@@ -1,8 +1,12 @@
-﻿using DeveloperChallenges.DTO;
+﻿using Amazon.SecretsManager.Model;
+using DeveloperChallenges.DTO;
 using DeveloperChallenges.Models;
 using DeveloperChallenges.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Amazon.SecretsManager;
+using Amazon.SecretsManager.Model;
+using Newtonsoft.Json.Linq;
 
 namespace DeveloperChallenges.Controllers
 {
@@ -66,6 +70,17 @@ namespace DeveloperChallenges.Controllers
                 return NotFound();
             }
         }
+        [HttpGet("GetReplays/{id}")]
+        public IActionResult GetReplays(int id)
+        {
+            var replays = _applicationService.GetReplays(id);
+            if (replays == null || replays.Count == 0)
+            {
+                return NotFound("No replays found for the given challenge.");
+            }
+            return Ok(replays);
+        }
+
 
         [HttpPost("AddChallenge")]
         public IActionResult AddChallenge([FromBody]Challenge challenge)
@@ -124,5 +139,47 @@ namespace DeveloperChallenges.Controllers
             var categories = _applicationService.GetDistinctCategories();
             return Ok(categories);
         }
+
+        [HttpDelete("DeleteReplay/{id}")]
+        public IActionResult DeleteReplay(int id)
+        {
+            var replay = _applicationService.GetReplays(id);
+
+            if (replay == null)
+            {
+                return NotFound(new { Message = "Replay not found." });
+            }
+
+            var response = _applicationService.DeleteReplay(id);
+
+            if (response.IsSuccess)
+            {
+                return Ok(new { Message = response.Message });
+            }
+
+            return BadRequest(new { Message = response.Message });
+        }
+
+
+        [HttpPut("UpdateReplay/{id}")]
+        public IActionResult UpdateReplay(int id, [FromBody] ChallengeReplay updatedReplay)
+        {
+            if (updatedReplay == null || string.IsNullOrWhiteSpace(updatedReplay.Content))
+            {
+                return BadRequest("Replay content cannot be empty.");
+            }
+
+            var replay = _applicationService.GetReplays(updatedReplay.ChallengeId)
+                .FirstOrDefault(r => r.Id == id);
+
+            if (replay == null)
+            {
+                return NotFound("Replay not found.");
+            }
+
+            _applicationService.UpdateReplay(id, updatedReplay);
+            return Ok("Replay updated successfully.");
+        }
+
     }
 }
